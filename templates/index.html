@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPA| Python Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        #startup-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .modal-content {
+            background: #111;
+            border: 1px solid #333;
+            border-left: 4px solid #00ff41;
+            padding: 40px;
+            width: 450px;
+            max-width: 90%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .modal-title {
+            color: #fff;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .modal-subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .modal-signature {
+            color: #e0e0e0;
+            font-size: 1.1rem;
+            padding-top: 20px;
+            border-top: 1px solid #222;
+        }
+
+        .highlight {
+            color: #00ff41;
+            font-weight: 600;
+        }
+
+        .close-modal-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #555;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .close-modal-btn:hover {
+            color: #ff3333;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="startup-modal">
+        <div class="modal-content">
+            <button class="close-modal-btn" onclick="closeStartupModal()">&times;</button>
+            
+            <div class="modal-title">Mail-Armor</div>
+            <div class="modal-subtitle"></div>
+            
+            <div class="modal-signature">
+                <span class="highlight">Arnav Katyal</span>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🛡️</span>
+                <h1>Mail-Armor</h1>
+                <span class="logo-subtitle">By Arnav Katyal</span>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot active"></span>
+                <span>System Active</span>
+            </div>
+        </header>
+        <main class="dashboard">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li class="nav-item active" data-tab="header-analyzer">
+                        <span class="nav-icon">📧</span>
+                        <span class="nav-text">Header Analyzer</span>
+                        <span class="nav-desc">Source IP Tracing</span>
+                    </li>
+                    <li class="nav-item" data-tab="link-xray">
+                        <span class="nav-icon">🔗</span>
+                        <span class="nav-text">Link X-Ray</span>
+                        <span class="nav-desc">URL Unshortener</span>
+                    </li>
+                    <li class="nav-item" data-tab="typosquatting">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Typosquatting Hunter</span>
+                        <span class="nav-desc">Evil Twin Detection</span>
+                    </li>
+                    <li class="nav-item" data-tab="file-sandbox">
+                        <span class="nav-icon">📁</span>
+                        <span class="nav-text">File Sandbox</span>
+                        <span class="nav-desc">Magic Byte Analysis</span>
+                    </li>
+                    <li class="nav-item" data-tab="spam-nlp">
+                        <span class="nav-icon">🤖</span>
+                        <span class="nav-text">Spam NLP</span>
+                        <span class="nav-desc">Content Risk Score</span>
+                    </li>
+                </ul>
+            </nav>
+
+           
+            <section class="content">
+                <div id="header-analyzer" class="tool-module active">
+                    <div class="module-header">
+                        <h2>Header Analyzer</h2>
+                        <p class="module-description">Extract and trace the true origin of email headers</p>
+                    </div>
+                    <div class="input-section">
+                        <label for="email-header">Raw Email Headers</label>
+                        <textarea id="email-header" placeholder="Paste complete email headers here...&#10;&#10;Example:&#10;Received: from mail-server.example.com [192.168.1.1]&#10;X-Originating-IP: [203.0.113.42]&#10;..." rows="12"></textarea>
+                        <button class="analyze-btn" onclick="analyzeHeader()">
+                            <span class="btn-icon">🔍</span>
+                            Analyze Headers
+                        </button>
+                    </div>
+                    <div id="header-results" class="results-section hidden">
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h3>Origin Analysis</h3>
+                                <span class="confidence-badge">Confidence: High</span>
+                            </div>
+                            <div class="result-content">
+                                <div class="data-row">
+                                    <span class="data-label">IP Address:</span>
+                                    <span class="data-value" id="header-ip"></span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Location:</span>
+                                    <span class="data-value" id="header-location"></span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">ISP:</span>
+                                    <span class="data-value" id="header-isp"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="link-xray" class="tool-module">
+                    <div class="module-header">
+                        <h2>Link X-Ray</h2>
+                        <p class="module-description">Safely trace shortened URLs to their final destination</p>
+                    </div>
+                    <div class="input-section">
+                        <label for="short-url">Shortened URL</label>
+                        <input type="url" id="short-url" placeholder="e.g., https://bit.ly/abc123 or bit.ly/abc123">
+                        <button class="analyze-btn" onclick="unshortenUrl()">
+                            <span class="btn-icon">🔗</span>
+                            Trace URL
+                        </button>
+                    </div>
+                    <div id="url-results" class="results-section hidden">
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h3>URL Analysis</h3>
+                                <span class="status-indicator" id="url-status"></span>
+                            </div>
+                            <div class="result-content">
+                                <div class="data-row">
+                                    <span class="data-label">Original URL:</span>
+                                    <span class="data-value" id="original-url"></span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Final Destination:</span>
+                                    <span class="data-value" id="final-url"></span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Redirect Chain:</span>
+                                    <span class="data-value" id="redirect-count"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="typosquatting" class="tool-module">
+                    <div class="module-header">
+                        <h2>Typosquatting Hunter</h2>
+                        <p class="module-description">Detect malicious domains that mimic legitimate ones</p>
+                    </div>
+                    <div class="input-section">
+                        <label for="domain-input">Domain Name</label>
+                        <input type="text" id="domain-input" placeholder="e.g., google.com">
+                        <button class="analyze-btn" onclick="checkTyposquatting()">
+                            <span class="btn-icon">👥</span>
+                            Hunt for Typosquats
+                        </button>
+                    </div>
+                    <div id="typosquatting-results" class="results-section hidden">
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h3>Typosquatting Analysis</h3>
+                                <span class="scan-badge" id="domains-scanned"></span>
+                            </div>
+                            <div class="result-content">
+                                <div id="fake-domains-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="file-sandbox" class="tool-module">
+                    <div class="module-header">
+                        <h2>File Sandbox</h2>
+                        <p class="module-description">Analyze file magic bytes to detect spoofed extensions</p>
+                    </div>
+                    <div class="input-section">
+                        <label for="file-input">Suspicious File</label>
+                        <div class="file-upload-area">
+                            <input type="file" id="file-input" accept="*/*">
+                            <div class="upload-prompt">
+                                <span class="upload-icon">📁</span>
+                                <p>Click to select file or drag and drop</p>
+                                <small>Maximum file size: 16MB</small>
+                            </div>
+                        </div>
+                        <button class="analyze-btn" onclick="analyzeFile()">
+                            <span class="btn-icon">🔍</span>
+                            Analyze File
+                        </button>
+                    </div>
+                    <div id="file-results" class="results-section hidden">
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h3>File Analysis</h3>
+                                <span class="risk-badge" id="file-risk-level"></span>
+                            </div>
+                            <div class="result-content">
+                                <div class="data-row">
+                                    <span class="data-label">Filename:</span>
+                                    <span class="data-value" id="file-name"></span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Stated Type:</span>
+                                    <span class="data-value" id="stated-type"></span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Actual Type:</span>
+                                    <span class="data-value" id="actual-type"></span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="data-label">Magic Bytes:</span>
+                                    <span class="data-value" id="magic-bytes"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="spam-nlp" class="tool-module">
+                    <div class="module-header">
+                        <h2>Spam NLP</h2>
+                        <p class="module-description">Analyze email content for phishing indicators</p>
+                    </div>
+                    <div class="input-section">
+                        <label for="email-content">Email Content</label>
+                        <textarea id="email-content" placeholder="Paste email body text here...&#10;&#10;Example:&#10;URGENT: Your account will be suspended!&#10;Click here to verify your password immediately..." rows="12"></textarea>
+                        <button class="analyze-btn" onclick="analyzeSpam()">
+                            <span class="btn-icon">🤖</span>
+                            Analyze Content
+                        </button>
+                    </div>
+                    <div id="spam-results" class="results-section hidden">
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h3>Content Risk Analysis</h3>
+                                <div class="risk-circle">
+                                    <span class="risk-score" id="risk-percentage">0</span>
+                                    <span class="risk-label">% Risk</span>
+                                </div>
+                            </div>
+                            <div class="result-content">
+                                <div class="risk-level" id="risk-level-text"></div>
+                                <div class="keyword-analysis" id="keyword-matches"></div>
+                                <div class="analysis-summary" id="analysis-summary"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Analyzing...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        function closeStartupModal() {
+            const modal = document.getElementById('startup-modal');
+            modal.style.transition = 'opacity 0.3s ease';
+            modal.style.opacity = '0';
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+    </script>
+</body>
+</html>
