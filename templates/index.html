@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPA| Python Project</title>
+    <title>GPA | arnav | python</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -159,6 +159,10 @@
                         </button>
                     </div>
                     <div id="header-results" class="results-section hidden">
+                        <div id="header-verdict-banner" class="risk-level" style="display: none; margin-bottom: 1.5rem;">
+                            <h3 id="header-verdict-title" style="margin-bottom: 0.5rem; font-weight: 700;"></h3>
+                            <p id="header-verdict-desc" style="color: var(--text-primary); font-size: 0.9rem;"></p>
+                        </div>
                         <div class="result-card">
                             <div class="result-header">
                                 <h3>Origin Analysis</h3>

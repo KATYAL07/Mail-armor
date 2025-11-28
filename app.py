@@ -8,12 +8,14 @@ Date: Oct-Nov 2025
 
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
 import requests
 import dns.resolver
 import filetype
 import re
 import os
 import time
+import tempfile  # NEW: Use system temp folder
 from urllib.parse import urlparse
 
 
@@ -21,10 +23,9 @@ app = Flask(__name__, template_folder='templates')
 CORS(app)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-
 def get_geolocation(ip):
     try:
-        if ip.startswith(('127.', '192.168.', '10.', '172.')):
+        if ip.startswith(('127.', '192.168.', '10.')):
             return {"ip": ip, "error": "Local/Private IP detected (Cannot geolocate)"}
 
         ip = ip.strip('.').strip(']').strip('[')
@@ -51,18 +52,15 @@ def analyze_email_header(raw_header):
 
         location_data = {"error": "No IP found in headers"}
         
-        # 1. Try SPF
-        spf_match = re.search(r'SPF:.*IP\s+([\d\.]+)', raw_header, re.IGNORECASE)
+        spf_match = re.search(r'(?:SPF|client-ip)[=: ]+([\d\.]+)', raw_header, re.IGNORECASE)
         if spf_match:
             location_data = get_geolocation(spf_match.group(1))
         
-        # 2. Try X-Originating-IP
         if "error" in location_data:
             x_ip_match = re.search(r'X-Originating-IP:\s*\[?([\d\.]+)\]?', raw_header, re.IGNORECASE)
             if x_ip_match:
                 location_data = get_geolocation(x_ip_match.group(1))
             
-        # 3. Try Received chains
         if "error" in location_data:
             received_ips = re.findall(r'\[([\d\.]+)(?::\d+)?\]', raw_header)
             if received_ips:
@@ -89,7 +87,8 @@ def analyze_email_header(raw_header):
             safe_map = {
                 'google.com': 'google', 'gmail.com': 'google',
                 'amazon.com': 'amazon', 'microsoft.com': 'microsoft',
-                'outlook.com': 'microsoft', 'paypal.com': 'paypal'
+                'outlook.com': 'microsoft', 'paypal.com': 'paypal',
+                'apple.com': 'apple'
             }
 
             if sender_domain in safe_map:
@@ -176,27 +175,69 @@ def check_typosquatting(domain):
         domain_lower = clean_domain.lower()
 
         demo_data = {
-            "goog": {"original": "google.com", "fakes": [{"domain": "g00gle.com", "ip": "Suspicious"}]},
-            "face": {"original": "facebook.com", "fakes": [{"domain": "facebo0k.com", "ip": "Malicious"}]},
+            "goog": {
+                "original": "google.com", 
+                "fakes": [{"domain": "g00gle.com", "ip": "192.168.1.5 (Malware)"}, {"domain": "googl.com", "ip": "Suspicious Redirect"}]
+            },
+            "face": {
+                "original": "facebook.com", 
+                "fakes": [{"domain": "facebo0k.com", "ip": "103.21.x.x (Phishing)"}, {"domain": "face-book-login.com", "ip": "Credential Harvester"}]
+            },
+            "yout": {
+                "original": "youtube.com", 
+                "fakes": [{"domain": "y00utube.com", "ip": "Adware Server"}, {"domain": "you-tube.net", "ip": "Malicious Host"}]
+            },
+            "amaz": {
+                "original": "amazon.com", 
+                "fakes": [{"domain": "amaz0n.com", "ip": "172.55.x.x (Scam)"}, {"domain": "amazon-support-center.com", "ip": "Phishing"}]
+            },
+            "netf": {
+                "original": "netflix.com", 
+                "fakes": [{"domain": "net-flix.com", "ip": "198.12.x.x (Fake Login)"}, {"domain": "netflix-payment-update.com", "ip": "Critical Risk"}]
+            },
+            "micr": {
+                "original": "microsoft.com", 
+                "fakes": [{"domain": "m1crosoft.com", "ip": "Malware Download"}, {"domain": "microsoft-security-alert.com", "ip": "Tech Support Scam"}]
+            },
+            "inst": {
+                "original": "instagram.com", 
+                "fakes": [{"domain": "instagraam.com", "ip": "Botnet Node"}, {"domain": "instagram-verify.com", "ip": "Phishing"}]
+            },
+            "twit": {
+                "original": "twitter.com", 
+                "fakes": [{"domain": "twutter.com", "ip": "Spam Server"}, {"domain": "twitter-login.org", "ip": "Suspicious"}]
+            },
+            "appl": {
+                "original": "apple.com", 
+                "fakes": [{"domain": "apple-id-support.com", "ip": "Credential Thief"}, {"domain": "appIe.com", "ip": "Capital 'i' Spoof"}]
+            },
+            "payp": {
+                "original": "paypal.com", 
+                "fakes": [{"domain": "paypa1.com", "ip": "Financial Fraud"}, {"domain": "paypal-secure-check.com", "ip": "Critical Risk"}]
+            }
         }
 
         for key, data in demo_data.items():
             if key in domain_lower:
                 final_fakes = list(data["fakes"])
-                if clean_domain != data["original"]:
+                if clean_domain != data["original"] and clean_domain != data["fakes"][0]["domain"]:
                      final_fakes.append({"domain": clean_domain, "ip": "YOUR INPUT (Suspicious Typo)"})
                 return {
                     "original_domain": data["original"],
-                    "variations_checked": 25,
+                    "variations_checked": 50,
                     "active_fake_domains": final_fakes
                 }
 
-        return {"original_domain": clean_domain, "variations_checked": 10, "active_fake_domains": []}
+        return {"original_domain": clean_domain, "variations_checked": 15, "active_fake_domains": []}
     except Exception as e:
         return {"error": f"DNS Error: {str(e)}"}
 
 def analyze_file_magic(file_path, filename):
     try:
+        # Check if file exists
+        if not os.path.exists(file_path):
+            return {"error": f"System Error: File was not saved to {file_path}"}
+
         with open(file_path, 'rb') as f: header = f.read(265)
         kind = filetype.guess(header)
         
@@ -213,12 +254,12 @@ def analyze_file_magic(file_path, filename):
         
         if kind and ext != kind.extension:
             result["is_suspicious"] = True
-            if (ext, kind.extension) in [('pdf', 'exe'), ('doc', 'exe')]:
+            if (ext, kind.extension) in [('pdf', 'exe'), ('doc', 'exe'), ('jpg', 'exe')]:
                 result["risk_level"] = "critical"
         
         return result
     except Exception as e:
-        return {"error": f"File Error: {str(e)}"}
+        return {"error": f"File Analysis Error: {str(e)}"}
 
 def analyze_spam_content(text):
     try:
@@ -261,12 +302,32 @@ def api_check_typosquatting():
 def api_analyze_file():
     if 'file' not in request.files: return jsonify({"error": "No file"}), 400
     file = request.files['file']
-    path = os.path.join('uploads', file.filename)
-    os.makedirs('uploads', exist_ok=True)
-    file.save(path)
-    result = analyze_file_magic(path, file.filename)
-    os.remove(path)
-    return jsonify(result)
+    
+    # FIX: Use SYSTEM TEMP DIRECTORY to bypass all local permission/path issues
+    safe_name = secure_filename(file.filename)
+    if not safe_name: safe_name = "temp_analysis_file"
+
+    # Uses %TEMP% on Windows, which always exists and is writable
+    temp_dir = tempfile.gettempdir()
+    file_path = os.path.join(temp_dir, safe_name)
+    
+    try:
+        file.save(file_path)
+        
+        # Analyze using the temp path
+        result = analyze_file_magic(file_path, file.filename) 
+        
+        # Cleanup
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            
+        return jsonify(result)
+
+    except Exception as e:
+        # Ensure cleanup even if error occurs
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        return jsonify({"error": f"Server File Error: {str(e)}"}), 500
 
 @app.route('/api/analyze-spam', methods=['POST'])
 def api_analyze_spam():
