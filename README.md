@@ -2,8 +2,7 @@
 
 ## 📝 Description
 
-Mail-armor — a software project built with modern tooling.
-
+Mail-armor is a software project built with modern tooling, structured internally as a comprehensive Java Algorithms Mini-Project. It provides an interactive command-line interface to explore and test various foundational data structures and algorithmic solutions.  
 ## ⚡ Quick Start
 
 ```bash
