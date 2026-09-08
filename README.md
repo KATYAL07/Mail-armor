@@ -7,6 +7,14 @@ Mail-armor is a software project built with modern tooling, structured internall
 
 ```bash
 
+
+🚀 Features & ModulesPermutation Generator: 
+Calculates and returns the k-th permutation of a sequence of numbers from 1 to n. 
+LRU Cache: A Least Recently Used cache implementation with a customizable capacity, utilizing a doubly-linked list and a hash map for efficient data retrieval and eviction. 
+Trie Dictionary: A prefix tree implementation for inserting words and efficiently searching for full words or prefixes.  
+Topological Sort: Resolves dependency orders (such as course prerequisites) using graph traversal techniques.  
+
+
 # 1. Clone the repository
 git clone https://github.com/KATYAL07/Mail-armor.git
 
