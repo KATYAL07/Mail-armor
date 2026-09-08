@@ -3,10 +3,6 @@
 ## 📝 Description
 
 Mail-armor is a software project built with modern tooling, structured internally as a comprehensive Java Algorithms Mini-Project. It provides an interactive command-line interface to explore and test various foundational data structures and algorithmic solutions.  
-## ⚡ Quick Start
-
-```bash
-
 
 🚀 Features & ModulesPermutation Generator: 
 Calculates and returns the k-th permutation of a sequence of numbers from 1 to n. 
@@ -15,6 +11,9 @@ Trie Dictionary: A prefix tree implementation for inserting words and efficientl
 Topological Sort: Resolves dependency orders (such as course prerequisites) using graph traversal techniques.  
 
 
+## ⚡ Quick Start
+
+```bash
 # 1. Clone the repository
 git clone https://github.com/KATYAL07/Mail-armor.git
 
