@@ -1,1 +1,38 @@
-Mail-armorMail-armor is a software project built with modern tooling, structured internally as a comprehensive Java Algorithms Mini-Project. It provides an interactive command-line interface to explore and test various foundational data structures and algorithmic solutions.  🚀 Features & ModulesPermutation Generator: Calculates and returns the k-th permutation of a sequence of numbers from 1 to n.  LRU Cache: A Least Recently Used cache implementation with a customizable capacity, utilizing a doubly-linked list and a hash map for efficient data retrieval and eviction.  Trie Dictionary: A prefix tree implementation for inserting words and efficiently searching for full words or prefixes.  Topological Sort: Resolves dependency orders (such as course prerequisites) using graph traversal techniques.  📁 Project StructureBelow are the core source files and their corresponding compiled bytecode components that power the application:Main.java: The main entry point that provides a loop-based console menu to test the different algorithm modules.  Main.class: The compiled bytecode for the main application entry point.  jav.java: Contains the Solution class, which houses the mathematical logic for the sequence permutation generator.  Solution.class: The compiled class file for the permutation logic.  LRUCache.java: The core implementation of the LRU Cache algorithm, complete with custom node management.  LRUCache.class: The compiled bytecode for the main cache data structure.  LRUCache$Node.class: The compiled bytecode for the internal doubly-linked list node used exclusively by the cache.  GraphUtils.java: Contains the static topologicalSort method for resolving directed acyclic graph dependencies using in-degree arrays and queues.  GraphUtils.class: The compiled bytecode for the graph utilities.  
+# Mail-armor
+
+## 📝 Description
+
+Mail-armor — a software project built with modern tooling.
+
+## ⚡ Quick Start
+
+```bash
+
+# 1. Clone the repository
+git clone https://github.com/KATYAL07/Mail-armor.git
+
+# See the Development Setup section below
+```
+
+## 👥 Contributors
+
+Thanks to everyone who has contributed to this project:
+
+<p align="left">
+<a href="https://github.com/KATYAL07" title="KATYAL07"><img src="https://avatars.githubusercontent.com/u/139534250?v=4&s=64" width="64" height="64" alt="KATYAL07" style="border-radius:50%" /></a>
+</p>
+
+[See the full list of contributors →](https://github.com/KATYAL07/Mail-armor/graphs/contributors)
+
+## 👥 Contributing
+
+Contributions are welcome! Here's the standard flow:
+
+1. **Fork** the repository
+2. **Clone** your fork: `git clone https://github.com/KATYAL07/Mail-armor.git`
+
+Please follow the existing code style and include tests for new behavior where applicable.
+
+---
+
+<div align="center">
